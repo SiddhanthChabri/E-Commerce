@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import connectDB from './config/connectDB.mjs'; // Importing correctly
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(morgan('dev')); // Fix: 'morgan()' needs an argument like 'dev'
 app.use(helmet({
     crossOriginResourcePolicy: false
 }));
+app.use('/api', userRoutes);
 
 const PORT = process.env.PORT || 8080; // Fix: Correct order
 

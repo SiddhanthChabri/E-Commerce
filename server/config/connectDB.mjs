@@ -1,22 +1,22 @@
+// Use import syntax for ES modules
 import { PrismaClient } from '@prisma/client';
 
+// Create an instance of PrismaClient
 const prisma = new PrismaClient();
 
+// Example function to test connection
 async function connectDB() {
   try {
-    const user = await prisma.user.create({
-      data: {
-        name: 'John Doe',
-        email: 'john@example.com',
-      },
-    });
-
-    console.log(user);
+    await prisma.$connect();
+    console.log('Connected to the database');
   } catch (error) {
-    console.error('Database connection error:', error);
-  } finally {
-    await prisma.$disconnect();
+    console.error('Error connecting to the database:', error);
   }
 }
 
-export default connectDB;
+connectDB()
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+
+  export default connectDB;

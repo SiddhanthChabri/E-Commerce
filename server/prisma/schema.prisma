@@ -7,8 +7,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Publicuser {
+  id           Int     @id @default(autoincrement())
+  name         String
+  email        String  @unique
+  password     String
+  avatar       String?
+  mobile       BigInt?
+  refreshToken String?
+
+  address_id Int?           @unique
+  address    Publicaddress? @relation("UserAddress", fields: [address_id], references: [id], onDelete: SetNull)
+
+  orders       Orders[]
+  cartProducts Publiccartproduct[]
+}
+
+model Publicaddress {
+  id          Int    @id @default(autoincrement())
+  user_id     Int?   @unique
+  street      String
+  city        String
+  state       String
+  country     String
+  postal_code String
+
+  user   Publicuser? @relation("UserAddress")
+  orders Orders[]
+}
+
+model Publiccartproduct {
+  product_id Int
+  user_id    Int
+  quantity   Int
+
+  product Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  user    Publicuser @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, user_id])
+}
+
+model Product {
+  id          Int     @id @default(autoincrement())
+  name        String
+  image       String?
+  unit        String?
+  stock       Int?
+  price       Int?
+  discount    Int?
+  description String?
+
+  productCategories    ProductCategory[]
+  productSubCategories ProductSubCategory[]
+  orders               Orders[]
+  cartProducts         Publiccartproduct[]
+}
+
+model Category {
   id    Int     @id @default(autoincrement())
-  name  String
-  email String  @unique
+  name  String  @unique
+  image String?
+
+  // Provide a unique name for the relation
+  productCategories     ProductCategory[]     @relation("CategoryProductCategories") // Reverse relation
+  subCategoryCategories SubCategoryCategory[]
+}
+
+model ProductCategory {
+  product_id  Int
+  category_id Int
+
+  product  Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  category Category @relation("CategoryProductCategories", fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, category_id])
+}
+
+model SubCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subCategoryCategories SubCategoryCategory[] // Reverse relation
+  productSubCategories  ProductSubCategory[]  @relation("SubCategoryProductSubCategories") // Reverse relation
+}
+
+model ProductSubCategory {
+  product_id      Int
+  sub_category_id Int
+
+  product     Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  subCategory SubCategory @relation("SubCategoryProductSubCategories", fields: [sub_category_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, sub_category_id])
+}
+
+model SubCategoryCategory {
+  subCategoryId Int
+  categoryId    Int
+
+  subCategory SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([subCategoryId, categoryId])
+}
+
+model Orders {
+  id                  Int     @id @default(autoincrement())
+  user_id             Int
+  order_id            Int     @unique
+  product_id          Int
+  product_name        String?
+  product_image       String?
+  payment_id          Int
+  payment_status      String?
+  delivery_address_id Int
+  subtotal_amount     Int?
+  total_amount        Int?
+  invoice_receipt     String?
+
+  user            Publicuser    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  deliveryAddress Publicaddress @relation(fields: [delivery_address_id], references: [id], onDelete: Cascade)
 }

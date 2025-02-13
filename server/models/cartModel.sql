@@ -1,0 +1,10 @@
+CREATE TABLE "public"."CartProduct" (
+    id SERIAL PRIMARY KEY NOT NULL,
+    product_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES "public"."User"(id) ON DELETE CASCADE,
+    CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES "public"."Product"(id) ON DELETE CASCADE
+);
