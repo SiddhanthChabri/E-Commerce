@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-// 🛠 Helper Function: Convert BigInt to String
+// Helper Function: Convert BigInt to String
 const bigIntToString = (obj) => {
     return JSON.parse(JSON.stringify(obj, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value
@@ -19,8 +20,19 @@ export const createUser = async (req, res) => {
 
         const mobileBigInt = mobile ? BigInt(mobile) : null;
 
+        
+
+        const salt = await bcryptjs.genSalt(10)
+        const hashPassword = await bcryptjs.hash(password, salt)
+
+        const payload = {
+            name,
+            email,
+            password : hashPassword
+        }
+
         const newUser = await prisma.publicuser.create({
-            data: { name, email, password, avatar, mobile: mobileBigInt },
+            data: { ...payload, avatar, mobile: mobileBigInt },
         });
 
         res.status(201).json({ message: 'User created successfully', user: bigIntToString(newUser) });
@@ -30,7 +42,7 @@ export const createUser = async (req, res) => {
     }
 };
 
-// 🟢 Get All Users
+// Get All Users
 export const getUsers = async (req, res) => {
     try {
         const users = await prisma.publicuser.findMany();
@@ -58,7 +70,7 @@ export const updateUser = async (req, res) => {
     }
 };
 
-// 🔴 Delete User
+// Delete User
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;

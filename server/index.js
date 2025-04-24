@@ -25,6 +25,9 @@ app.use('/api', userRoutes);
 
 const PORT = process.env.PORT || 8080; // Fix: Correct order
 
+
+app.use('/api/user', userRoutes)
+
 // Connect to DB and start server
 connectDB().then(() => {
     app.listen(PORT, () => {
